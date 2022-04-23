@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments made by João Pedro Seara
-# Last updated: Mar 4, 2022
+# Last updated: Apr 14, 2022
 
 DIR_TO_BCK=/home
 OUTPUT_DIR=/media/jpseara/STORAGE
@@ -22,7 +22,7 @@ fi
 
 # Unlock sudo before starting and grab the user and group ids, also clean some existing leftovers from previous backups
 
-sudo cat /dev/null
+sudo cat /dev/null || exit 1
 bak_user=`id -u ${BACKUP_OWNER}`
 bak_group=`id -g ${BACKUP_OWNER}`
 sudo rm -f /tmp/"${BACKUP_NAME}".tgz
