@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Backup script for Linux environments made by João Pedro Seara
-# Last updated: Apr 14, 2022
+# Last updated: Apr 24, 2022
 
 DIR_TO_BCK=/home
-OUTPUT_DIR=/media/jpseara/STORAGE
+OUTPUT_DIR=/media/$(whoami)/STORAGE
 BACKUP_OWNER=$(whoami)
 BACKUP_NAME=Ubuntu
 
@@ -56,9 +56,10 @@ sudo tar --ignore-failed-read --no-wildcards-match-slash -czpf /tmp/"${BACKUP_NA
 \
   "${DIR_TO_BCK}"/*/.bash_profile \
   "${DIR_TO_BCK}"/*/.bashrc \
-  "${DIR_TO_BCK}"/*/.profile \
   "${DIR_TO_BCK}"/*/.gitconfig \
   "${DIR_TO_BCK}"/*/.gnupg \
+  "${DIR_TO_BCK}"/*/.hidden \
+  "${DIR_TO_BCK}"/*/.profile \
   "${DIR_TO_BCK}"/*/.ssh \
 \
   --exclude="${DIR_TO_BCK}/*/.*" \
