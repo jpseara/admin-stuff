@@ -1,23 +1,26 @@
 #!/bin/bash
 
-# Upgrade script for Linux made by João Pedro Seara
-# Last updated: Mar 12, 2022
+# Upgrade script for Linux, by João Pedro Seara
+# Last updated: May 7, 2022
 
-# Unlock sudo before starting
+# Verify if this script is being run as root
 
-sudo cat /dev/null
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root or using sudo!"
+  exit 1
+fi
 
 # Update packages, snaps and firmware
 
 echo -e "\nUpgrading packages ...\n"
-sudo apt clean && sudo apt update && sudo apt dist-upgrade -y && sudo apt autoremove -y --purge && sudo apt purge -y '~c'
-#sudo yum clean all && sudo yum check-update && sudo yum upgrade -y && sudo yum autoremove -y
+apt clean && apt update && apt dist-upgrade -y && apt autoremove -y --purge && apt purge -y '~c'
+#yum clean all && yum check-update && yum upgrade -y && yum autoremove -y
 
 echo -e "\nUpgrading snaps ...\n"
-sudo snap refresh
+snap refresh
 
 echo -e "\nUpgrading firmware ...\n"
-sudo fwupdmgr refresh -y --force && sudo fwupdmgr update -y
+fwupdmgr refresh -y --force && fwupdmgr update -y
 
 echo -e "\nDone."
 
