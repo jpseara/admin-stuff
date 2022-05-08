@@ -71,8 +71,8 @@ tar --ignore-failed-read --no-wildcards-match-slash -czpf /tmp/"${BACKUP_NAME}".
   "${DIR_TO_BCK}"/*/.profile \
   "${DIR_TO_BCK}"/*/.ssh \
 \
-  --exclude="${DIR_TO_BCK}/*/.*" \
-  --exclude="${DIR_TO_BCK}/*/snap" \
+  --exclude="${DIR_TO_BCK}"/*/.* \
+  --exclude="${DIR_TO_BCK}"/*/snap \
 \
   "${DIR_TO_BCK}" \
   || { echo -e "\ntar failed!"; mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg.old "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg 2> /dev/null; rm -f /tmp/"${BACKUP_NAME}".tgz; rm -f "${DIR_TO_BCK}"/.backup_timestamp; exit 1; }
