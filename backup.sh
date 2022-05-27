@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: May 7, 2022
+# Last updated: May 27, 2022
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -50,7 +50,7 @@ etc_settings_dir="${DIR_TO_BCK}"/"${BACKUP_OWNER}"/Settings/Etc && mkdir -p "${e
 
 # Start creation of encrypted backup
 
-echo -e "\nBacking up '${DIR_TO_BCK}' to '${OUTPUT_DIR}' ...\n"
+echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.tgz.gpg' ...\n"
 
 # Create a backup timestamp and move previous backups to the side
 

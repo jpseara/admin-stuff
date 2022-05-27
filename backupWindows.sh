@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for the Windows mountpoint, by João Pedro Seara
-# Last updated: May 7, 2022
+# Last updated: May 27, 2022
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -49,7 +49,7 @@ mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.ol
 
 # Start creation of an encrypted backup
 
-echo -e "\nBacking up '${DIR_TO_BCK}' to '${OUTPUT_DIR}' ...\n"
+echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.7z' ...\n"
 
 7z a -t7z -mhe -p"${ZIP_PASSPHRASE}" "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z 2> /dev/null; rm -f "${DIR_TO_BCK}"/.backup_timestamp; exit 1; }
 
