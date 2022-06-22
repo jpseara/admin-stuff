@@ -1,0 +1,264 @@
+SYSTEM ADMINISTRATION
+
+Some miscellaneous foundational knowledge, useful for general system administration. (Mostly related to Linux, but there's a Windows section in the bottom!)
+
+__
+COMMANDS
+
+Status and diagnostics:
+
+sudo uname -a # kernel info
+sudo cat /etc/*release # os info
+sudo top # CPU and process status
+sudo iotop # I/O status
+sudo iftop # network status
+sudo free # memory status
+sudo ps aux # process list
+sudo fdisk -l # disk list
+sudo lsblk # block list
+sudo lspci # PCI devices list (network card, graphic card, USB/PCI/ISA controllers)
+sudo lsscsi # SCSI devices list (disks)
+sudo lsusb # USB devices list (keyboards, mouses)
+sudo lshw # all hardware listing. Alternative: sudo dmidecode
+
+Hostname:
+
+sudo hostname
+sudo hostnamectl set-hostname <hostname>
+
+Network:
+
+sudo ip addr # show all IPs
+sudo ip addr add 192.168.50.5 dev eth1 # add ip to port
+sudo ip addr del 192.168.50.5 dev eth1 # remove ip from port
+sudo ip link set eth1 down # port down
+sudo ip link set eth1 up # port up
+sudo ip route # show all routes
+sudo ip route add 172.10.1.0/24 via 10.0.0.100 dev eth0 # add route
+sudo ip route del 172.10.1.0/24 via 10.0.0.100 dev eth0 # remove route
+
+Date:
+
+sudo date
+sudo date --set="2 OCT 2022 18:00:00" # example
+sudo hwclock --show
+sudo hwclock --set --date=”9/22/19 18:55:10″
+sudo timedatectl list-timezones
+sudo timedatectl set-timezone <timezone>
+
+Firewall:
+
+sudo ufw --force enable # or 'disable'
+sudo ufw default deny incoming
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+#sudo ufw allow from 192.168.1.1 to any port 3306 proto tcp
+#sudo ufw deny 8080
+#sudo ufw reject 8080
+#sudo ufw status numbered
+#sudo ufw delete 4
+sudo ufw status verbose
+sudo iptables -L -n
+sudo systemctl status ufw --no-pager
+
+Connectivity testing:
+
+ping -c 3 <host>
+nc -v -w 5 -z <host> <port> # test connection
+nc -v -w 5 <host> <port> # same but keep connection open (don't exit right away)
+nc -u -v -w 5 -z <host> <port> # same for UDP
+sudo nc -l -n -v <port> # listen TCP
+sudo nc -l -n -u -v <port> # listen UDP
+
+SSH/SCP:
+
+ssh -o StrictHostKeyChecking=no root@remote-host # connect to a remote host without nagging for host key acceptance
+ssh root@remote-host -- "ls | grep *.py" # run command remotely
+scp ./file.txt root@remote-host:~/ # send a file to a remote host
+scp root@remote-host:~/file.txt . # grab a file from the remote host
+
+APT:
+
+sudo apt clean && sudo apt update && sudo apt dist-upgrade -y # upgrade
+sudo apt autoremove -y --purge && sudo apt purge -y '~c' # clean up
+sudo apt-query policy sudo apt-cache policy linux-image-azure # info about a package
+sudo apt purge '~c' # remove all "rc" packages
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C8CAB6595FDFF622 # adding a repo key
+#wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - # another way to import directly some key
+
+Users:
+
+sudo useradd -m -c "Senhor Smith" -s /bin/bash jsmith # -G for comma separated extra groups
+sudo passwd jsmith # add password
+sudo userdel jsmith # -r to remove home folder as well
+sudo usermod -L -e 1 jsmith # lock user
+sudo usermod -U -e "" jsmith # unlock user
+sudo chage -l jsmith # user status
+
+Groups:
+
+sudo groupadd newgroup
+sudo usermod -aG newgroup jsmith # add user to group
+sudo gpasswd -d jsmith newgroup # remove user from group
+sudo groupdel newgroup
+
+Handle ACLs for a said directory and all subdirectories and files:
+
+sudo apt-get install acl -y
+sudo setfacl -R -m d:g:newgroup:rwx,g:newgroup:rwx ./directory # change defaults (future files), and current files
+sudo getfacl ./folder
+#setfacl -R -x d:g:newgroup,g:newgroup ./directory # remove an ACL from directory and all subdirectoies
+#setfacl -R -b ./directory # remove all ACLs from directory and all subdirectoies
+
+__
+RECIPES
+
+Restrict directory access for Apache:
+
+sudo chown -R www-data:www-data /var/www/html
+sudo chmod 775 /var/www/html
+sudo chmod 770 /var/www/html/*
+sudo chmod g+s /var/www/html
+sudo chmod g+s /var/www/html/*
+
+Add/define restricted in to Apache and assign it to only members of a specific group:
+
+sudo mkdir /var/www/html/devel
+sudo chmod 770 /var/www/html/devel
+sudo chmod g+s /var/www/html/devel
+sudo chown -R www-data:developers /var/www/html/devel # 'developers' group
+
+User/host authentication in Apache:
+
+> Using a local file:
+
+sudo htpasswd -c -m /etc/apache2/.htpasswd myuser1
+sudo chmod 640 /etc/apache2/.htpasswd
+sudo chown root:www-data /etc/apache2/.htpasswd
+#sudo htpasswd -m /etc/apache2/.htpasswd myuser2 # to add more users...
+sudo vi /etc/apache2/sites-enabled/vhost1.conf # add the following lines to the VirtualHost definition
+###
+	<Location />
+		Deny from all
+		# IP access allowed
+		Allow from 127.0.0.1
+		#Allow from 192.168.122.0/24
+		AuthUserFile /etc/apache2/.htpasswd
+ 		AuthName "Restricted Area"
+		AuthType Basic
+		# Satisfy Any will allow either IP or authentication; Satisfy All will enforce both IP and authentication
+		Satisfy Any
+		Require valid-user
+	</Location>
+###
+sudo systemctl reload apache2
+
+> Using system users:
+
+sudo apt-get install libapache2-mod-authz-unixgroup libapache2-mod-authnz-external pwauth -y
+sudo vi /etc/apache2/sites-enabled/vhost1.conf # add the following lines to the VirtualHost definition
+###
+	<IfModule mod_authnz_external.c>
+		AddExternalAuth pwauth /usr/sbin/pwauth
+		SetExternalAuthMethod pwauth pipe
+	</IfModule>
+	<Location />
+		Deny from all
+		# IP access allowed
+		Allow from 127.0.0.1
+		#Allow from 192.168.122.0/24
+		AuthBasicProvider external
+		AuthExternal pwauth
+		AuthName "Restricted Area"
+		AuthType Basic
+		# "Satisfy Any" will allow IP or authentication; "Satisfy All" will enforce both IP and authentication
+		Satisfy Any
+                # Comment "Require valid-user" and uncomment the other two lines to allow only certain groups
+		Require valid-user
+		#Require unix-group ubuntu 
+		#Require unix-group www-data
+	</Location>
+###
+sudo systemctl reload apache2
+
+Chroot user in SFTP (also disables SSH):
+
+# Example: jail to the directory /var/www, sftp only
+# Note that the jailed directory must be root-owned, and also can't be writable by any other group or user (usually this works: root:root 755)
+
+sudo groupadd sftp-www
+sudo useradd -m -G sftp-www -c "Developer User" -s /bin/bash dev
+#sudo usermod -aG sftp-www dev
+#sudo passwd dev
+sudo vi /etc/ssh/sshd_config
+###
+Subsystem sftp internal-sftp
+Match Group sftp-www
+	ChrootDirectory /var/www
+	ForceCommand internal-sftp
+###
+sudo systemctl restart sshd
+
+Add a disk, and extend LVM volume:
+
+DISK=/dev/vdb # sudo fdisk -l
+VG=bionic-vg # sudo vgdisplay
+LV=/dev/mapper/bionic--vg-root # sudo lvdisplay
+sudo pvcreate $DISK
+sudo vgextend $VG $DISK
+sudo lvextend -l +100%FREE $LV
+sudo resize2fs $LV # ext4
+#sudo xfs_growfs $LV # xfs
+#sudo btrfs filesystem resize max $LV # brtfs
+
+__
+WINDOWS
+
+Restart/shutdown:
+
+shutdown -r -t 0
+shutdown -s -t 0
+
+Services (start/stop/restart/status/startup):
+
+Start-Service spooler
+Stop-Service spooler
+Restart-Service spooler
+Get-Service spooler
+Get-Service # list all
+Set-Service spooler -StartupType 'Automatic' # or 'Manual' or 'Disabled'
+
+Server configurator (hostname/upstates/date):
+
+sconfig
+
+Connectivity testing:
+
+Test-NetConnection <host> -p <port>
+
+Reinitialize the evaluation period:
+
+slmgr -rearm # needs reboot (note: there is a limit of 6 rearms for a single installation - 6*180d=3y)
+slmgr -dlv # shows days and rearms left
+
+Install SSH server:
+
+Add-WindowsCapability -Online -Name OpenSSH.Client
+Add-WindowsCapability -Online -Name OpenSSH.Server
+#Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
+Set-Service sshd -StartupType 'Automatic'
+Start-Service sshd
+
+Configure authorized keys for SSH:
+
+1. Create/add public key to one of the following authorized keys files:
+C:\Users\<user>\.ssh\authorized_keys # for a normal user
+C:\ProgramData\ssh\administrators_authorized_keys # for administrators (keys are common for all administrators)
+
+2. Make the following changes in C:\ProgramData\ssh\sshd_config:
+PubkeyAuthentication yes
+StrictModes no
+
+3. Restart the service:
+Restart-Service sshd
