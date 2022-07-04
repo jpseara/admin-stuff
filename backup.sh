@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: May 27, 2022
+# Last updated: Jul 4, 2022
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -92,6 +92,7 @@ rm -f "${DIR_TO_BCK}"/.backup_timestamp
 # Show status of the generated file
 
 chown ${bak_user}:${bak_group} "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
+chmod 644 "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
 echo ""
 stat "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
 
