@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Jul 4, 2022
+# Last updated: Jul 5, 2022
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -42,6 +42,8 @@ while [[ ${GPG_PASSPHRASE} = "" || "${GPG_PASSPHRASE}" != "${GPG_CONFIRMATION}" 
   read -s -p "Please confirm the passphrase: " GPG_CONFIRMATION
   echo ""
 done
+
+start_time=$SECONDS
 
 # In this section, copy stuff that you'd like to backup into the backup directory, before starting
 
@@ -96,9 +98,11 @@ chmod 644 "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
 echo ""
 stat "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
 
+time_elapsed=$(( SECONDS - start_time ))
+
 echo -e "\nBackup file '${BACKUP_NAME}.tgz.gpg' created."
 echo -e "\nTo decrypt and decompress the generated file with the original permissions: gpg -d '${BACKUP_NAME}.tgz.gpg' | tar -xzpf -"
 echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
-echo -e "\nDone."
+eval "echo -e \\\nDone. Time taken: $(date -ud "@$time_elapsed" +'$((%s/3600)) hr %M min %S sec')"
 
 exit 0

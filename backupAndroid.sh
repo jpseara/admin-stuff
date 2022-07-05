@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for an Android (MTP) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Jul 4, 2022
+# Last updated: Jul 5, 2022
 
 DIR_TO_BCK="${XDG_RUNTIME_DIR}/gvfs/mtp:host=SAMSUNG_SAMSUNG_Android_R58N80JHCYJ/Cartão SD"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -36,6 +36,8 @@ while [[ ${ZIP_PASSPHRASE} = "" || "${ZIP_PASSPHRASE}" != "${ZIP_CONFIRMATION}" 
   echo ""
 done
 
+start_time=$SECONDS
+
 # Create a backup timestamp and move previous backups to the side
 
 date +%Y%m%d%H%M%S > "${DIR_TO_BCK}"/.backup_timestamp
@@ -45,7 +47,7 @@ mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.ol
 
 echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.7z' ...\n"
 
-7z a -xr'!.*' -t7z -mhe -p"${ZIP_PASSPHRASE}" "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z 2> /dev/null; rm -f "${DIR_TO_BCK}"/.backup_timestamp; exit 1; }
+7z a -t7z -mhe -p"${ZIP_PASSPHRASE}" "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z 2> /dev/null; rm -f "${DIR_TO_BCK}"/.backup_timestamp; exit 1; }
 
 # Remove the timestamp and previous backups
 
@@ -58,9 +60,11 @@ chmod 644 "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
 echo ""
 stat "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
 
+time_elapsed=$(( SECONDS - start_time ))
+
 echo -e "\nBackup file '${BACKUP_NAME}.7z' created."
 echo -e "\nTo decrypt and decompress the generated file: 7z x '${BACKUP_NAME}.7z'"
 echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
-echo -e "\nDone."
+eval "echo -e \\\nDone. Time taken: $(date -ud "@$time_elapsed" +'$((%s/3600)) hr %M min %S sec')"
 
 exit 0

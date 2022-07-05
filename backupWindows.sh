@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for a Windows (NTFS) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: May 27, 2022
+# Last updated: Jul 5, 2022
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -36,6 +36,8 @@ while [[ ${ZIP_PASSPHRASE} = "" || "${ZIP_PASSPHRASE}" != "${ZIP_CONFIRMATION}" 
   echo ""
 done
 
+start_time=$SECONDS
+
 # Create a backup timestamp and move previous backups to the side
 
 date +%Y%m%d%H%M%S > "${DIR_TO_BCK}"/.backup_timestamp
@@ -58,9 +60,11 @@ chmod 644 "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
 echo ""
 stat "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
 
+time_elapsed=$(( SECONDS - start_time ))
+
 echo -e "\nBackup file '${BACKUP_NAME}.7z' created."
 echo -e "\nTo decrypt and decompress the generated file: 7z x '${BACKUP_NAME}.7z'"
 echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
-echo -e "\nDone."
+eval "echo -e \\\nDone. Time taken: $(date -ud "@$time_elapsed" +'$((%s/3600)) hr %M min %S sec')"
 
 exit 0
