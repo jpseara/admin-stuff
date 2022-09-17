@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Jul 5, 2022
+# Last updated: Sep 9, 2022
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -25,7 +25,7 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-# Grab the user and group ids, also clean some existing leftovers from previous backups
+# Before starting, grab some needed information and remove any leftovers from previous backups
 
 bak_user=`id -u "${BACKUP_OWNER}"`
 bak_group=`id -g "${BACKUP_OWNER}"`
@@ -45,7 +45,7 @@ done
 
 start_time=$SECONDS
 
-# In this section, copy stuff that you'd like to backup into the backup directory, before starting
+# Add some extra stuff into the backup directory, to include it in the final archive
 
 echo -e "\nGathering some data to back up, before starting the archiving ...\n"
 etc_settings_dir="${DIR_TO_BCK}"/"${BACKUP_OWNER}"/Settings/Etc && mkdir -p "${etc_settings_dir}" && tar --ignore-failed-read --no-wildcards-match-slash -czpf "${etc_settings_dir}"/etc.tgz /etc && chown -R ${bak_user}:${bak_group} "${etc_settings_dir}" # Saving the contents of etc under the backup directory
