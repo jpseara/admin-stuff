@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Sep 9, 2022
+# Last updated: Sep 19, 2022
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -101,7 +101,7 @@ stat "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
 time_elapsed=$(( SECONDS - start_time ))
 
 echo -e "\nBackup file '${BACKUP_NAME}.tgz.gpg' created."
-echo -e "\nTo decrypt and decompress the generated file with the original permissions: gpg -d '${BACKUP_NAME}.tgz.gpg' | tar -xzpf -"
+echo -e "\nTo decrypt and decompress the generated file with the original permissions: gpg -d '${BACKUP_NAME}.tgz.gpg' | sudo tar -xzpf -"
 echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
 eval "echo -e \\\nDone. Time taken: $(date -ud "@$time_elapsed" +'$((%s/3600)) hr %M min %S sec')"
 
