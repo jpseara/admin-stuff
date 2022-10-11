@@ -239,8 +239,8 @@ Test-NetConnection <host> -p <port>
 
 Reinitialize the evaluation period:
 
+slmgr -dlv # shows days and rearms left (if it shows "License Status: Notification" it means the evaluation period already expired)
 slmgr -rearm # needs reboot (note: there is a limit of 6 rearms for a single installation - 6*180d=3y)
-slmgr -dlv # shows days and rearms left
 
 Install SSH server:
 
