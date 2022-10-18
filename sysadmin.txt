@@ -73,6 +73,7 @@ sudo nc -l -n -u -v <port> # listen UDP
 
 SSH/SCP:
 
+ssh-keygen -t rsa # generate a new SSH key pair
 ssh -o StrictHostKeyChecking=no root@remote-host # connect to a remote host without nagging for host key acceptance
 ssh root@remote-host -- "ls | grep *.py" # run command remotely
 scp ./file.txt root@remote-host:~/ # send a file to a remote host
