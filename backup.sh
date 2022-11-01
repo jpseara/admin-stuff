@@ -6,7 +6,7 @@
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
 BACKUP_OWNER="`loginctl user-status | head -1 | awk '{print $1}'`"
-BACKUP_NAME="Ubuntu"
+BACKUP_NAME="`hostname -s`_`lsb_release -is`"
 
 # Verify if this script is being run as root and/or if directories exist
 

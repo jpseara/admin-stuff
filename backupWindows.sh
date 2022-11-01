@@ -5,7 +5,7 @@
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
-BACKUP_NAME="Windows"
+BACKUP_NAME="JP-WIN_Windows"
 
 # Verify if this script is being run as the session user and/or if directories exist
 
