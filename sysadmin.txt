@@ -267,4 +267,4 @@ Restart-Service sshd
 __
 LINKS
 
-Linux Commands Cheat Sheet - https://www.linuxtrainingacademy.com/linux-commands-cheat-sheet/
+The ultimate Linux commands cheat sheet - https://www.fosslinux.com/45587/linux-command-cheat-sheet.htm
