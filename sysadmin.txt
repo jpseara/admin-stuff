@@ -22,6 +22,7 @@ sudo lsusb # USB devices list (keyboards, mouses)
 sudo lshw # all hardware listing. Alternative: sudo dmidecode
 
 Files and directories:
+
 stat file1 # show file permissions and timestamps
 touch -d '1 June 2018 11:02' document.pdf # change the timestamp of a file
 
