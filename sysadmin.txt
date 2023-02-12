@@ -226,6 +226,14 @@ Restart/shutdown:
 shutdown -r -t 0
 shutdown -s -t 0
 
+HW, OS and BIOS information:
+
+wmic computersystem get model,name,manufacturer,systemtype
+wmic baseboard get product,manufacturer,version,serialnumber
+wmic cpu get caption,deviceid,name,numberofcores,maxclockspeed
+wmic os get name,description,version
+wmic bios get manufacturer,name,serialnumber,smbiosbiosversion
+
 Services (start/stop/restart/status/startup):
 
 Start-Service spooler
