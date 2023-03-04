@@ -228,11 +228,16 @@ shutdown -s -t 0
 
 HW, OS and BIOS information:
 
+systeminfo # overview
 wmic computersystem get model,name,manufacturer,systemtype
 wmic baseboard get product,manufacturer,version,serialnumber
 wmic cpu get caption,deviceid,name,numberofcores,maxclockspeed
 wmic os get name,description,version
 wmic bios get manufacturer,name,serialnumber,smbiosbiosversion
+
+Server configurator (hostname/upstates/date):
+
+sconfig
 
 Services (start/stop/restart/status/startup):
 
@@ -242,10 +247,6 @@ Restart-Service spooler
 Get-Service spooler
 Get-Service # list all
 Set-Service spooler -StartupType 'Automatic' # or 'Manual' or 'Disabled'
-
-Server configurator (hostname/upstates/date):
-
-sconfig
 
 Connectivity testing:
 
