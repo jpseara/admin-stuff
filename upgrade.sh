@@ -10,11 +10,11 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-# Update packages, snaps and firmware
+# Update packages, snaps, and firmware
 
 echo -e "\nUpgrading packages ...\n"
-apt clean && apt update && apt upgrade -y && apt autoremove -y --purge && apt purge -y '~c'
-#yum clean all && yum check-update && yum upgrade -y && yum autoremove -y
+which apt > /dev/null 2>&1 && (apt clean && apt update && apt upgrade -y && apt-mark minimize-manual -y && apt autoremove -y --purge && apt purge -y '~c')
+which yum > /dev/null 2>&1 && (yum clean all && yum check-update; [[ $? != 1 ]] && yum upgrade -y && yum autoremove -y)
 
 echo -e "\nUpgrading snaps ...\n"
 snap refresh
