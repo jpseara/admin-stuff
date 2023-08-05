@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Upgrade script for Linux, by João Pedro Seara
-# Last updated: May 7, 2022
+# Last updated: Aug 5, 2023
 
 # Verify if this script is being run as root
 
@@ -13,7 +13,7 @@ fi
 # Update packages, snaps and firmware
 
 echo -e "\nUpgrading packages ...\n"
-apt clean && apt update && apt dist-upgrade -y && apt autoremove -y --purge && apt purge -y '~c'
+apt clean && apt update && apt upgrade -y && apt autoremove -y --purge && apt purge -y '~c'
 #yum clean all && yum check-update && yum upgrade -y && yum autoremove -y
 
 echo -e "\nUpgrading snaps ...\n"
