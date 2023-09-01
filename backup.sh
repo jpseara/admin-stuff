@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Sep 19, 2022
+# Last updated: Sep 1, 2023
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -47,7 +47,7 @@ start_time=$SECONDS
 
 # Add some extra stuff into the backup directory, to include it in the final archive
 
-echo -e "\nGathering some data to back up, before starting the archiving ...\n"
+echo -e "\nGathering some extra stuff to back up, before generating the archive ...\n"
 etc_settings_dir="${DIR_TO_BCK}"/"${BACKUP_OWNER}"/Settings/Etc && mkdir -p "${etc_settings_dir}" && tar --ignore-failed-read --no-wildcards-match-slash -czpf "${etc_settings_dir}"/etc.tgz /etc && chown -R ${bak_user}:${bak_group} "${etc_settings_dir}" # Saving the contents of etc under the backup directory
 
 # Start creation of encrypted backup
@@ -85,7 +85,7 @@ chown ${bak_user}:${bak_group} /tmp/"${BACKUP_NAME}".tgz
 
 gpg -c --batch --yes --passphrase "${GPG_PASSPHRASE}" -o "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg /tmp/"${BACKUP_NAME}".tgz || { echo -e "\ngpg failed!"; mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg.old "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg 2> /dev/null; rm -f /tmp/"${BACKUP_NAME}".tgz; rm -f "${DIR_TO_BCK}"/.backup_timestamp; exit 1; }
 
-# Remove the timestamp, generated temporary files and previous backups
+# Remove the timestamp, generated temporary files, and previous backups
 
 rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg.old
 rm -f /tmp/"${BACKUP_NAME}".tgz
