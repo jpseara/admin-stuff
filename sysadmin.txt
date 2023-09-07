@@ -87,6 +87,7 @@ scp root@remote-host:~/file.txt . # grab a file from the remote host
 SSL:
 
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfsigned.key -out selfsigned.crt # interactively generate a self-signed x509 certificate ready to be used in a web server
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfsigned.key -out selfsigned.crt -addext "subjectAltName = DNS:server.lab, DNS:website.lab, IP:192.168.11.1" # same, but defining multiple CNAMEs from the command
 
 APT:
 
