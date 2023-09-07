@@ -84,6 +84,10 @@ ssh root@remote-host -- "ls | grep *.py" # run command remotely
 scp ./file.txt root@remote-host:~/ # send a file to a remote host
 scp root@remote-host:~/file.txt . # grab a file from the remote host
 
+SSL:
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfsigned.key -out selfsigned.crt # interactively generate a self-signed x509 certificate ready to be used in a web server
+
 APT:
 
 sudo apt clean && sudo apt update && sudo apt dist-upgrade -y # upgrade
