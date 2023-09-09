@@ -287,3 +287,4 @@ __
 LINKS
 
 The ultimate Linux commands cheat sheet - https://www.fosslinux.com/45587/linux-command-cheat-sheet.htm
+SSL/TLS tester - https://testssl.sh
