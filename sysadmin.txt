@@ -26,6 +26,13 @@ Files and directories:
 stat file1 # show file permissions and timestamps
 touch -d '1 June 2018 11:02' document.pdf # change the timestamp of a file
 
+Services:
+
+sudo systemctl list-units --all --no-pager # list all services currently loaded
+sudo systemctl list-units --failed --no-pager # list all currently failed services
+sudo systemctl list-unit-files --all --no-pager # list all configured services and their enablement state
+sudo systemctl disable apache2 --now # disable a service (remove it from boot) and stop it right now. Use 'enable' to re-enable it
+
 Hostname:
 
 sudo hostname
