@@ -82,6 +82,7 @@ nc -v -w 5 <host> <port> # same but keep connection open (don't exit right away)
 nc -u -v -w 5 -z <host> <port> # same for UDP
 sudo nc -l -n -v <port> # listen TCP
 sudo nc -l -n -u -v <port> # listen UDP
+curl -s https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py | python3 - # internet speed test
 
 SSH/SCP:
 
