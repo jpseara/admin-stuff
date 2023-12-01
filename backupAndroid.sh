@@ -51,6 +51,7 @@ echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.7z' ...
 7z a -t7z -mhe -p"${ZIP_PASSPHRASE}" "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z \
 \
   -xr'!.history' \
+  -xr'!.thumbnails/' \
   -xr'!.MetaEcfsFile' \
   -xr'!Android/' \
 \
