@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Upgrade script for Linux, by João Pedro Seara
-# Last updated: Aug 5, 2023
+# Last updated: Feb 9, 2024
 
 # Verify if this script is being run as root
 
@@ -14,7 +14,7 @@ fi
 
 echo -e "\nUpgrading packages ...\n"
 which apt > /dev/null 2>&1 && (apt clean && apt update && apt upgrade -y && apt-mark minimize-manual -y && apt autoremove -y --purge && apt purge -y '~c')
-which yum > /dev/null 2>&1 && (yum clean all && yum check-update; [[ $? != 1 ]] && yum upgrade -y && yum autoremove -y)
+which yum > /dev/null 2>&1 && (yum clean all && yum makecache && yum upgrade -y && yum autoremove -y)
 
 echo -e "\nUpgrading snaps ...\n"
 snap refresh
