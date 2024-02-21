@@ -24,7 +24,7 @@ sudo lshw # all hardware listing. Alternative: sudo dmidecode
 Files and directories:
 
 stat file1 # show file permissions and timestamps
-touch -d '1 June 2018 11:02' document.pdf # change the timestamp of a file
+touch -d '21 Aug 2018 18:00' document.pdf # change the timestamp of a file
 
 Services:
 
