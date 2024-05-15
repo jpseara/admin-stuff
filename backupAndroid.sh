@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for an Android (MTP) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Dec 1, 2023
+# Last updated: May 16, 2024
 
 DIR_TO_BCK="${XDG_RUNTIME_DIR}/gvfs/mtp:host=SAMSUNG_SAMSUNG_Android_R58N80JHCYJ/Cartão SD"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -36,6 +36,7 @@ while [[ ${ZIP_PASSPHRASE} = "" || "${ZIP_PASSPHRASE}" != "${ZIP_CONFIRMATION}" 
   echo ""
 done
 
+echo -e "\nBackup start time: "$(date "+%Y-%m-%d %H:%M:%S %Z")
 start_time=$SECONDS
 
 # Create a backup timestamp and move previous backups to the side

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Sep 1, 2023
+# Last updated: May 16, 2024
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -43,6 +43,7 @@ while [[ ${GPG_PASSPHRASE} = "" || "${GPG_PASSPHRASE}" != "${GPG_CONFIRMATION}" 
   echo ""
 done
 
+echo -e "\nBackup start time: "$(date "+%Y-%m-%d %H:%M:%S %Z")
 start_time=$SECONDS
 
 # Add some extra stuff into the backup directory, to include it in the final archive
