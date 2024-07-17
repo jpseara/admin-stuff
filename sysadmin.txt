@@ -55,6 +55,7 @@ sudo date
 sudo date --set="2 OCT 2022 18:00:00" # example
 sudo hwclock --show
 sudo hwclock --set --date=”9/22/19 18:55:10″
+sudo hwclock --systohc --update-drift # set from OS clock
 sudo timedatectl list-timezones
 sudo timedatectl set-timezone <timezone>
 
@@ -129,6 +130,13 @@ sudo setfacl -R -m d:g:newgroup:rwx,g:newgroup:rwx ./directory # change defaults
 sudo getfacl ./folder
 #setfacl -R -x d:g:newgroup,g:newgroup ./directory # remove an ACL from directory and all subdirectoies
 #setfacl -R -b ./directory # remove all ACLs from directory and all subdirectoies
+
+BIOS firmware:
+
+sudo fwupdmgr get-devices # show all devices
+sudo fwupdmgr get-releases # show all releases for a device
+sudo fwupdmgr get-updates # show available updates
+sudo fwupdmgr refresh -y --force && sudo fwupdmgr update -y
 
 __
 RECIPES
