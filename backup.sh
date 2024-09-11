@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: May 16, 2024
+# Last updated: Sep 11, 2024
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -49,7 +49,11 @@ start_time=$SECONDS
 # Add some extra stuff into the backup directory, to include it in the final archive
 
 echo -e "\nGathering some extra stuff to back up, before generating the archive ...\n"
-etc_settings_dir="${DIR_TO_BCK}"/"${BACKUP_OWNER}"/Settings/Etc && mkdir -p "${etc_settings_dir}" && tar --ignore-failed-read --no-wildcards-match-slash -czpf "${etc_settings_dir}"/etc.tgz /etc && chown -R ${bak_user}:${bak_group} "${etc_settings_dir}" # Saving the contents of etc under the backup directory
+extra_bak_dir="${DIR_TO_BCK}"/"${BACKUP_OWNER}"/Backups
+mkdir -p "${extra_bak_dir}" -m 755
+tar --ignore-failed-read --no-wildcards-match-slash -czpf "${extra_bak_dir}"/etc.tgz /etc # saving the contents of etc
+#tar --ignore-failed-read --no-wildcards-match-slash -czpf "${extra_bak_dir}"/root.tgz /root # saving the contents of root
+chown -R ${bak_user}:${bak_group} "${extra_bak_dir}"
 
 # Start creation of encrypted backup
 
