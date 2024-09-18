@@ -25,6 +25,7 @@ Files and directories:
 
 stat file1 # show file permissions and timestamps
 touch -d '21 Aug 2018 18:00' document.pdf # change the timestamp of a file
+sudo du --max-depth=5 / | sort -rn | head -50 # what is filling the disk
 
 Services:
 
