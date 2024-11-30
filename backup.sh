@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Sep 11, 2024
+# Last updated: Nov 30, 2024
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -59,9 +59,9 @@ chown -R ${bak_user}:${bak_group} "${extra_bak_dir}"
 
 echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.tgz.gpg' ...\n"
 
-# Create a backup timestamp and move previous backups to the side
+# Create a backup timestamp (UTC) and move previous backups to the side
 
-date +%Y%m%d%H%M%S > "${DIR_TO_BCK}"/.backup_timestamp
+date -u +%Y%m%d%H%M%SZ > "${DIR_TO_BCK}"/.backup_timestamp
 mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg.old 2> /dev/null
 
 # First, archive the directory and compress it

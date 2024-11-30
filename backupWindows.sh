@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for a Windows (NTFS) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: May 16, 2024
+# Last updated: Nov 30, 2024
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -39,9 +39,9 @@ done
 echo -e "\nBackup start time: "$(date "+%Y-%m-%d %H:%M:%S %Z")
 start_time=$SECONDS
 
-# Create a backup timestamp and move previous backups to the side
+# Create a backup timestamp (UTC) and move previous backups to the side
 
-date +%Y%m%d%H%M%S > "${DIR_TO_BCK}"/.backup_timestamp
+date -u +%Y%m%d%H%M%SZ > "${DIR_TO_BCK}"/.backup_timestamp
 mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old 2> /dev/null
 
 # Start creation of an encrypted backup (excluding some Windows system files/folders)
