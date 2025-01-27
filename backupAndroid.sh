@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Backup script for an Android (MTP) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Nov 30, 2024
+# Last updated: Jan 27, 2025
 
 DIR_TO_BCK="${XDG_RUNTIME_DIR}/gvfs/mtp:host=SAMSUNG_SAMSUNG_Android_R58N80JHCYJ/Cartão SD"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
-BACKUP_NAME="JP-MOBILE_Android"
+HOST_NAME="JP-MOBILE"
+BACKUP_NAME="${HOST_NAME}_Android"
 
 # Verify if this script is being run as the session user and/or if directories exist
 

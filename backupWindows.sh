@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Backup script for a Windows (NTFS) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Nov 30, 2024
+# Last updated: Jan 27, 2025
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
-BACKUP_NAME="JP_Windows"
+HOST_NAME="JP"
+BACKUP_NAME="${HOST_NAME}_Windows"
 
 # Verify if this script is being run as the session user and/or if directories exist
 
