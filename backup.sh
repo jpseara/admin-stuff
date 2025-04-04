@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Nov 30, 2024
+# Last updated: Apr 4, 2025
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -70,6 +70,7 @@ mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg "${OUTPUT_DIR}"/"${BACKUP_NAME}".
 
 tar --ignore-failed-read --no-wildcards-match-slash -czpf /tmp/"${BACKUP_NAME}".tgz \
 \
+  "${DIR_TO_BCK}"/*/.bash_aliases \
   "${DIR_TO_BCK}"/*/.bash_profile \
   "${DIR_TO_BCK}"/*/.bashrc \
   "${DIR_TO_BCK}"/*/.gitconfig \
