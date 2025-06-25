@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Apr 4, 2025
+# Last updated: Jun 25, 2025
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -16,7 +16,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 if [ ! -d "${DIR_TO_BCK}" ]; then
-  echo "Directory to backup '${DIR_TO_BCK}' does not exist!"
+  echo "Directory to back up '${DIR_TO_BCK}' does not exist!"
   exit 1
 fi
 

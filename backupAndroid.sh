@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for an Android (MTP) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Jan 27, 2025
+# Last updated: Jun 25, 2025
 
 DIR_TO_BCK="${XDG_RUNTIME_DIR}/gvfs/mtp:host=SAMSUNG_SAMSUNG_Android_R58N80JHCYJ/Cartão SD"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -16,7 +16,7 @@ if [[ $EUID -ne `loginctl user-status | head -1 | awk '{print $2}' | grep -Eo '[
 fi
 
 if [ ! -d "${DIR_TO_BCK}" ]; then
-  echo "Directory to backup '${DIR_TO_BCK}' does not exist!"
+  echo "Directory to back up '${DIR_TO_BCK}' does not exist!"
   exit 1
 fi
 
