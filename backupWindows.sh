@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Backup script for a Windows (NTFS) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Jun 25, 2025
+# Last updated: Sep 1, 2025
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
 HOST_NAME="JP"
 BACKUP_NAME="${HOST_NAME}_Windows"
+NUM_BCK_TO_KEEP=3
 
 # Verify if this script is being run as the session user and/or if directories exist
 
@@ -37,17 +38,17 @@ while [[ ${ZIP_PASSPHRASE} = "" || "${ZIP_PASSPHRASE}" != "${ZIP_CONFIRMATION}" 
   echo ""
 done
 
+# Let's start
+
 echo -e "\nBackup start time: "$(date "+%Y-%m-%d %H:%M:%S %Z")
 start_time=$SECONDS
 
-# Create a backup timestamp (UTC) and move previous backups to the side
-
-date -u +%Y%m%d%H%M%SZ > "${DIR_TO_BCK}"/.backup_timestamp
-mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old 2> /dev/null
-
 # Start creation of an encrypted backup (excluding some Windows system files/folders)
 
-echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.7z' ...\n"
+echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}' ...\n"
+backup_timestamp=`date -u +%Y%m%d%H%M%SZ`
+
+rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z # remove any previous leftovers
 
 7z a -t7z -mhe -ssc- -p"${ZIP_PASSPHRASE}" "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z \
 \
@@ -57,24 +58,28 @@ echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}/${BACKUP_NAME}.7z' ...
   -xr'!Thumbs.db' \
   -xr'!System Volume Information/' \
 \
-  "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; mv -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z 2> /dev/null; rm -f "${DIR_TO_BCK}"/.backup_timestamp; exit 1; }
+  "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z; exit 1; }
 
-# Remove the timestamp and previous backups
-
-rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z.old
-rm -f "${DIR_TO_BCK}"/.backup_timestamp
-
-# Show status of the generated file
+# Set permissions, add the timestamp, and show status of the generated file
 
 chmod 644 "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
 echo ""
-stat "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
+mv "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/"${BACKUP_NAME}_${backup_timestamp}".7z
+echo ""
+stat "${OUTPUT_DIR}"/"${BACKUP_NAME}_${backup_timestamp}".7z
+
+echo -e "\nBackup file '${BACKUP_NAME}_${backup_timestamp}.7z' created."
+echo -e "\nTo decrypt and decompress the generated file: 7z x '${BACKUP_NAME}_${backup_timestamp}.7z'"
+echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
+
+# Clean up older backups
+
+echo -e "\nCleaning up old backups (keeping only last ${NUM_BCK_TO_KEEP}) ..."
+find "${OUTPUT_DIR}" -type f -name "${BACKUP_NAME}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.7z" | sort | head -n -${NUM_BCK_TO_KEEP} | xargs rm -f
+
+# All done
 
 time_elapsed=$(( SECONDS - start_time ))
-
-echo -e "\nBackup file '${BACKUP_NAME}.7z' created."
-echo -e "\nTo decrypt and decompress the generated file: 7z x '${BACKUP_NAME}.7z'"
-echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
 eval "echo -e \\\nDone. Time taken: $(date -ud "@$time_elapsed" +'$((%s/3600)) hr %M min %S sec')"
 
 exit 0
