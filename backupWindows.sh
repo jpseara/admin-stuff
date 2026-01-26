@@ -1,18 +1,30 @@
 #!/bin/bash
 
 # Backup script for a Windows (NTFS) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Sep 1, 2025
+# Last updated: Jan 24, 2026
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
+#OUTPUT_DIR="${XDG_RUNTIME_DIR}/gvfs/google-drive:host=gmail.com,user=joao.pedro.seara/O meu disco"
+#TEMP_DIR="/tmp" # write the compressed bundle into this temporary directory and only then upload it to the target. Leave commented to stream the output directly into the target
 HOST_NAME="JP"
 BACKUP_NAME="${HOST_NAME}_Windows"
 NUM_BCK_TO_KEEP=3
+
+cleanup() {
+  rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
+  rm -f "${TEMP_DIR}"/"${BACKUP_NAME}".7z
+}
 
 # Verify if this script is being run as the session user and/or if directories exist
 
 if [[ $EUID -ne `loginctl user-status | head -1 | awk '{print $2}' | grep -Eo '[0-9]*'` ]]; then
   echo "This script must be run as the session user!"
+  exit 1
+fi
+
+if [[ `pgrep -f $0` != "$$" ]]; then
+  echo "Another instance of this script is already running, or you are using sudo to run it. Exiting!"
   exit 1
 fi
 
@@ -23,6 +35,11 @@ fi
 
 if [ ! -d "${OUTPUT_DIR}" ]; then
   echo "Destination directory '${OUTPUT_DIR}' does not exist!"
+  exit 1
+fi
+
+if [[ -v TEMP_DIR && ! -d "${TEMP_DIR}" ]]; then
+  echo "Temporary directory '${TEMP_DIR}' does not exist!"
   exit 1
 fi
 
@@ -40,6 +57,9 @@ done
 
 # Let's start
 
+[[ -v TEMP_DIR ]] || TEMP_DIR="${OUTPUT_DIR}" # if no TEMP_DIR is set, write directly into OUTPUT_DIR
+cleanup # remove any previous leftovers
+
 echo -e "\nBackup start time: "$(date "+%Y-%m-%d %H:%M:%S %Z")
 start_time=$SECONDS
 
@@ -48,9 +68,7 @@ start_time=$SECONDS
 echo -e "\nBacking up '${DIR_TO_BCK}' into '${OUTPUT_DIR}' ...\n"
 backup_timestamp=`date -u +%Y%m%d%H%M%SZ`
 
-rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z # remove any previous leftovers
-
-7z a -t7z -mhe -ssc- -p"${ZIP_PASSPHRASE}" "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z \
+7z a -t7z -mhe -ssc- -p"${ZIP_PASSPHRASE}" "${TEMP_DIR}"/"${BACKUP_NAME}".7z \
 \
   -xr'!$Recycle.Bin/' \
   -xr'!Default.rdp' \
@@ -58,24 +76,31 @@ rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z # remove any previous leftovers
   -xr'!Thumbs.db' \
   -xr'!System Volume Information/' \
 \
-  "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z; exit 1; }
+  "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; cleanup; exit 1; }
 
-# Set permissions, add the timestamp, and show status of the generated file
+#chmod 644 "${TEMP_DIR}"/"${BACKUP_NAME}".7z
 
-chmod 644 "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z
-echo ""
+# Upload the data and show status of the generated file
+
+if [[ "$TEMP_DIR" != "$OUTPUT_DIR" ]]; then
+  echo -e "\nNow uploading data ...\n"
+  #cp "${TEMP_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/ || { echo -e "\nUpload failed!"; cleanup; exit 1; }
+  rsync -h --progress "${TEMP_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/ || { echo -e "\nUpload failed!"; cleanup; exit 1; }
+fi
+sleep 3 # let things settle in the target
 mv "${OUTPUT_DIR}"/"${BACKUP_NAME}".7z "${OUTPUT_DIR}"/"${BACKUP_NAME}_${backup_timestamp}".7z
 echo ""
 stat "${OUTPUT_DIR}"/"${BACKUP_NAME}_${backup_timestamp}".7z
 
 echo -e "\nBackup file '${BACKUP_NAME}_${backup_timestamp}.7z' created."
-echo -e "\nTo decrypt and decompress the generated file: 7z x '${BACKUP_NAME}_${backup_timestamp}.7z'"
-echo -e "To umount the target: sudo umount '${OUTPUT_DIR}'"
+echo -e "\nTo decrypt and decompress the generated file: 7z x \"${OUTPUT_DIR}/${BACKUP_NAME}_${backup_timestamp}.7z\""
 
-# Clean up older backups
+# Clean up temporary files and older backups
 
-echo -e "\nCleaning up old backups (keeping only last ${NUM_BCK_TO_KEEP}) ..."
+echo -e "\nCleaning up temporary files and old backups (keeping only last ${NUM_BCK_TO_KEEP}) ..."
+cleanup
 find "${OUTPUT_DIR}" -type f -name "${BACKUP_NAME}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.7z" | sort | head -n -${NUM_BCK_TO_KEEP} | xargs rm -f
+gio list -d "${OUTPUT_DIR}" 2> /dev/null | grep "${BACKUP_NAME}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.7z" | sort | head -n -${NUM_BCK_TO_KEEP} | xargs -I% rm -f "${OUTPUT_DIR}/%" # make sure deletion happens in drives with encoded names
 
 # All done
 
