@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Jan 24, 2026
+# Last updated: Apr 25, 2026
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -10,14 +10,16 @@ OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
 BACKUP_OWNER="`loginctl user-status | head -1 | awk '{print $1}'`"
 BACKUP_NAME="`hostname -s`_`lsb_release -is`"
 NUM_BCK_TO_KEEP=3
+ENCR_PASSFILE="/home/`loginctl user-status | head -1 | awk '{print $1}'`/.backup-passphrase" # use the content of this file as the encryption passphrase of the backup. Leave commented for an interactive passphrase prompt
 
 cleanup() {
+  rm -f /tmp/".backup_${BACKUP_NAME}_passphrase".*
   rm -f "${OUTPUT_DIR}"/"${BACKUP_NAME}".tgz.gpg
   rm -f "${TEMP_DIR}"/"${BACKUP_NAME}".tgz.gpg
   sudo rm -f /tmp/"${BACKUP_NAME}".tgz
 }
 
-# Verify if this script is being run as the session user and/or if directories exist
+# Verify if this script is being run as the session user and/or if required directories/files exist
 
 if [[ $EUID -ne `loginctl user-status | head -1 | awk '{print $2}' | grep -Eo '[0-9]*'` ]]; then
   echo "This script must be run as the session user!"
@@ -44,28 +46,41 @@ if [[ -v TEMP_DIR && ! -d "${TEMP_DIR}" ]]; then
   exit 1
 fi
 
+if [[ -v ENCR_PASSFILE && ! -f "${ENCR_PASSFILE}" ]]; then
+  echo "Encryption passfile '${ENCR_PASSFILE}' does not exist!"
+  exit 1
+fi
+
 # Validate sudo
 
 echo -e "\nSome parts of this script will have to run as root. Validating sudo ..."
 sudo -v || exit 1
 echo -e "OK"
 
-# Ask for a GPG Passphrase
+cleanup # remove any previous leftovers
 
-echo -e "\nPlease type a GPG encryption passphrase to encrypt your backup:\n"
-GPG_PASSPHRASE=""
-GPG_CONFIRMATION=""
-while [[ ${GPG_PASSPHRASE} = "" || "${GPG_PASSPHRASE}" != "${GPG_CONFIRMATION}" ]]; do
-  read -s -p "GPG encryption passphrase: " GPG_PASSPHRASE
-  echo ""
-  read -s -p "Please confirm the passphrase: " GPG_CONFIRMATION
-  echo ""
-done
+# Ask for a backup encryption passphrase if the passfile does not exist
+
+if [[ ! -v ENCR_PASSFILE ]]; then
+  echo -e "\nPlease type a passphrase to encrypt your backup:\n"
+  encr_passphrase=""
+  encr_confirmation=""
+  while [[ ${encr_passphrase} = "" || "${encr_passphrase}" != "${encr_confirmation}" ]]; do
+    read -s -p "Encryption passphrase: " encr_passphrase
+    echo ""
+    read -s -p "Please confirm the passphrase: " encr_confirmation
+    echo ""
+  done
+  ENCR_PASSFILE=$(mktemp "/tmp/.backup_${BACKUP_NAME}_passphrase.XXXXX")
+  chmod 600 "${ENCR_PASSFILE}"
+  printf "%s" "${encr_passphrase}" > "${ENCR_PASSFILE}"
+else
+  echo -e "\nUsing the encryption passphrase stored in the passfile."
+fi
 
 # Let's start
 
 [[ -v TEMP_DIR ]] || TEMP_DIR="${OUTPUT_DIR}" # if no TEMP_DIR is set, write directly into OUTPUT_DIR
-cleanup # remove any previous leftovers
 
 echo -e "\nBackup start time: "$(date "+%Y-%m-%d %H:%M:%S %Z")
 start_time=$SECONDS
@@ -112,7 +127,7 @@ sudo chown ${bak_user}:${bak_group} /tmp/"${BACKUP_NAME}".tgz
 
 # Now encrypt it
 
-gpg -c --batch --yes --passphrase "${GPG_PASSPHRASE}" -o "${TEMP_DIR}"/"${BACKUP_NAME}".tgz.gpg /tmp/"${BACKUP_NAME}".tgz || { echo -e "\ngpg failed!"; cleanup; exit 1; }
+gpg -c --batch --yes --passphrase-file "${ENCR_PASSFILE}" -o "${TEMP_DIR}"/"${BACKUP_NAME}".tgz.gpg /tmp/"${BACKUP_NAME}".tgz || { echo -e "\ngpg failed!"; cleanup; exit 1; }
 
 #chmod 644 "${TEMP_DIR}"/"${BACKUP_NAME}".tgz.gpg
 
@@ -129,13 +144,13 @@ echo ""
 stat "${OUTPUT_DIR}"/"${BACKUP_NAME}_${backup_timestamp}".tgz.gpg
 
 echo -e "\nBackup file '${BACKUP_NAME}_${backup_timestamp}.tgz.gpg' created."
-echo -e "\nTo decrypt and decompress the generated file with the original permissions: gpg -d \"${OUTPUT_DIR}/${BACKUP_NAME}_${backup_timestamp}.tgz.gpg\" | sudo tar -xzpf -"
+echo -e "\nTo extract the generated file (with the original permissions): gpg -d \"${OUTPUT_DIR}/${BACKUP_NAME}_${backup_timestamp}.tgz.gpg\" | sudo tar -xzpf -"
 
 # Clean up temporary files and older backups
 
 echo -e "\nCleaning up temporary files and old backups (keeping only last ${NUM_BCK_TO_KEEP}) ..."
 cleanup
-find "${OUTPUT_DIR}" -type f -name "${BACKUP_NAME}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.tgz.gpg" | sort | head -n -${NUM_BCK_TO_KEEP} | xargs rm -f
+find "${OUTPUT_DIR}" -maxdepth 1 -type f -name "${BACKUP_NAME}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.tgz.gpg" | sort | head -n -${NUM_BCK_TO_KEEP} | xargs rm -f
 gio list -d "${OUTPUT_DIR}" 2> /dev/null | grep "${BACKUP_NAME}_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]Z.tgz.gpg" | sort | head -n -${NUM_BCK_TO_KEEP} | xargs -I% rm -f "${OUTPUT_DIR}/%" # make sure deletion happens in drives with encoded names
 
 # All done
