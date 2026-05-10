@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: Apr 25, 2026
+# Last updated: May 10, 2026
 
 DIR_TO_BCK="/home"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -10,7 +10,7 @@ OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
 BACKUP_OWNER="`loginctl user-status | head -1 | awk '{print $1}'`"
 BACKUP_NAME="`hostname -s`_`lsb_release -is`"
 NUM_BCK_TO_KEEP=3
-ENCR_PASSFILE="/home/`loginctl user-status | head -1 | awk '{print $1}'`/.backup-passphrase" # use the content of this file as the encryption passphrase of the backup. Leave commented for an interactive passphrase prompt
+ENCR_PASSFILE="/home/`loginctl user-status | head -1 | awk '{print $1}'`/.backup_passphrase" # use the content of this file as the encryption passphrase of the backup. Leave commented for an interactive passphrase prompt
 
 cleanup() {
   rm -f /tmp/".backup_${BACKUP_NAME}_passphrase".*
