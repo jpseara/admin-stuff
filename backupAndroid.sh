@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for an Android (MTP) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: May 10, 2026
+# Last updated: Sep 5, 2026
 
 DIR_TO_BCK="${XDG_RUNTIME_DIR}/gvfs/mtp:host=SAMSUNG_SAMSUNG_Android_R58N80JHCYJ/Cartão SD"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -85,10 +85,8 @@ backup_timestamp=`date -u +%Y%m%d%H%M%SZ`
 
 7z a -t7z -mhe -p"`cat "${ENCR_PASSFILE}"`" "${TEMP_DIR}"/"${BACKUP_NAME}".7z \
 \
-  -xr'!.history' \
-  -xr'!.thumbnails/' \
-  -xr'!.MetaEcfsFile' \
-  -xr'!Android/' \
+  -xr'!*/.*' \
+  -x'!*/Android/' \
 \
   "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; cleanup; exit 1; }
 

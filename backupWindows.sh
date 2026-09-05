@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup script for a Windows (NTFS) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: May 10, 2026
+# Last updated: Sep 5, 2026
 
 DIR_TO_BCK="/media/`loginctl user-status | head -1 | awk '{print $1}'`/WINDOWS/Dados"
 OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
@@ -85,11 +85,11 @@ backup_timestamp=`date -u +%Y%m%d%H%M%SZ`
 
 7z a -t7z -mhe -ssc- -p"`cat "${ENCR_PASSFILE}"`" "${TEMP_DIR}"/"${BACKUP_NAME}".7z \
 \
-  -xr'!$Recycle.Bin/' \
-  -xr'!Default.rdp' \
-  -xr'!desktop.ini' \
-  -xr'!Thumbs.db' \
-  -xr'!System Volume Information/' \
+  -xr'!*/$Recycle.Bin/' \
+  -xr'!*/Default.rdp' \
+  -xr'!*/desktop.ini' \
+  -xr'!*/Thumbs.db' \
+  -xr'!*/System Volume Information/' \
 \
   "${DIR_TO_BCK}" || { echo -e "\n7z failed!"; cleanup; exit 1; }
 
