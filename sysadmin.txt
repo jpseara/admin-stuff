@@ -140,7 +140,7 @@ sudo fwupdmgr get-updates # show available updates
 sudo fwupdmgr refresh -y --force && sudo fwupdmgr update -y
 
 __
-RECIPES
+RECIPES/ONELINERS
 
 Restrict directory access for Apache:
 
@@ -239,6 +239,14 @@ sudo lvextend -l +100%FREE $LV
 sudo resize2fs $LV # ext4
 #sudo xfs_growfs $LV # xfs
 #sudo btrfs filesystem resize max $LV # brtfs
+
+EXIF timestamp correction (photos/videos metadata):
+
+sudo apt-get install libimage-exiftool-perl -y
+
+PHOTO_FILE="./pic.jpg"; PHOTO_TIMESTAMP="23 Aug 2023 12:34"; PHOTO_TZ="$(timedatectl show -p Timezone --value)"; local_datetime="$(TZ="$PHOTO_TZ" date -d "$PHOTO_TIMESTAMP" '+%Y-%m-%d %H:%M:%S')"; dto="$(TZ="$PHOTO_TZ" date -d "$PHOTO_TIMESTAMP" '+%Y:%m:%d %H:%M:%S')"; offset="$(TZ="$PHOTO_TZ" date -d "$PHOTO_TIMESTAMP" '+%:z')"; utc="$(date -u -d "${local_datetime}${offset}" '+%Y:%m:%d %H:%M:%S')"; exiftool -overwrite_original_in_place "-DateTimeOriginal=$dto" "-CreateDate=$dto" "-ModifyDate=$dto" "-OffsetTimeOriginal=$offset" "-OffsetTimeDigitized=$offset" "-OffsetTime=$offset" "-GPSDateStamp=${utc:0:10}" "-GPSTimeStamp=${utc:11:8}" "$PHOTO_FILE" && touch -m -d "${local_datetime}${offset}" "$PHOTO_FILE"
+
+VIDEO_FILE="./vid.mp4"; VIDEO_TIMESTAMP="23 Aug 2023 12:34"; VIDEO_TZ="$(timedatectl show -p Timezone --value)"; local_datetime="$(TZ="$VIDEO_TZ" date -d "$VIDEO_TIMESTAMP" '+%Y-%m-%d %H:%M:%S')"; dto="$(TZ="$VIDEO_TZ" date -d "$VIDEO_TIMESTAMP" '+%Y:%m:%d %H:%M:%S')"; offset="$(TZ="$VIDEO_TZ" date -d "$VIDEO_TIMESTAMP" '+%:z')"; exiftool -overwrite_original_in_place "-CreateDate=$dto" "-ModifyDate=$dto" "-MediaCreateDate=$dto" "-MediaModifyDate=$dto" "-TrackCreateDate=$dto" "-TrackModifyDate=$dto" "$VIDEO_FILE" && touch -m -d "${local_datetime}${offset}" "$VIDEO_FILE"
 
 __
 WINDOWS
