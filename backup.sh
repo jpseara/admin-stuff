@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Backup script for Linux environments, by João Pedro Seara
-# Last updated: May 10, 2026
+# Last updated: Sep 29, 2026
 
 DIR_TO_BCK="/home"
-OUTPUT_DIR="/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
+OUTPUT_DIR="/run/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
 #OUTPUT_DIR="${XDG_RUNTIME_DIR}/gvfs/google-drive:host=gmail.com,user=joao.pedro.seara/O meu disco"
 #TEMP_DIR="/tmp" # write the compressed bundle into this temporary directory and only then upload it to the target. Leave commented to stream the output directly into the target
 BACKUP_OWNER="`loginctl user-status | head -1 | awk '{print $1}'`"
