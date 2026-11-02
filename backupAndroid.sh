@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Backup script for an Android (MTP) mountpoint within a Linux environment, by João Pedro Seara
-# Last updated: Sep 29, 2026
+# Last updated: Nov 2, 2026
 
 DIR_TO_BCK="${XDG_RUNTIME_DIR}/gvfs/mtp:host=Google_Pixel_10a_67281JEA300568/Armazen. interno partilhado"
 OUTPUT_DIR="/run/media/`loginctl user-status | head -1 | awk '{print $1}'`/STORAGE"
 #OUTPUT_DIR="${XDG_RUNTIME_DIR}/gvfs/google-drive:host=gmail.com,user=joao.pedro.seara/O meu disco"
 #TEMP_DIR="/tmp" # write the compressed bundle into this temporary directory and only then upload it to the target. Leave commented to stream the output directly into the target
-HOST_NAME="JP-MOBILE"
+HOST_NAME="JP-PHONE"
 BACKUP_NAME="${HOST_NAME}_Android"
 NUM_BCK_TO_KEEP=3
 ENCR_PASSFILE="/home/`loginctl user-status | head -1 | awk '{print $1}'`/.backup_passphrase" # use the content of this file as the encryption passphrase of the backup. Leave commented for an interactive passphrase prompt
